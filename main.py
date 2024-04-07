@@ -44,10 +44,12 @@ def authorize(user: dict = Depends(authenticate)):
         raise HTTPException(status_code=403, detail="Permission denied")
     return None
 
+# Get all users if the user is authenticated and haave admin role
 @app.get("/users", response_model=list[UserResponse])
 def get_users(user: dict = Depends(authorize)):
     return users
 
+# Get user by id if the user is authenticated and haave admin roles
 @app.get("/users/{user_id}", response_model=UserResponse)
 def get_user(user_id: str, user: dict = Depends(authorize)):
     for u in users:
