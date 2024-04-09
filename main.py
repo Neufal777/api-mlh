@@ -2,8 +2,21 @@ from fastapi import FastAPI, HTTPException, Security, Depends
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
 import uuid
+import time
 
 app = FastAPI()
+
+class PerformanceMiddleware:
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        start_time = time.time()
+        await self.app(scope, receive, send)
+        end_time = time.time()
+        print(f"Request processed in {end_time - start_time} seconds")
+
+app.add_middleware(PerformanceMiddleware)
 
 users = [
     {"id": str(uuid.uuid4()),"username": "Pranav", "email": "Pranav@ghw.com", "password":"pass", "role":"admin"},
@@ -35,7 +48,7 @@ def authenticate(credentials: HTTPBasicCredentials = Security(security)):
             user = u
             return user
     if user is None:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+        raise HTTPException(status_code=401, detail="User is not authenticated must be registered first")
     return None
 
 # authorize user
